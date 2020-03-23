@@ -4,19 +4,37 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"github.com/rakhmadbudiono/compare-api-framework/golang/domain/book"
+	"github.com/rakhmadbudiono/compare-api-framework/golang/util/pg"
 	"time"
 
-	"github.com/rakhmadbudiono/compare-api-framework/golang/routers"
-	"github.com/rakhmadbudiono/compare-api-framework/golang/utils/pg"
+	"github.com/gorilla/mux"
 )
 
-func main() {
-	configurePG()
-	startServer()
+func welcome(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(204)
+	w.Write([]byte{})
 }
 
-func configurePG() {
-	option := pg.Option{
+func main() {
+	port := os.Getenv("PORT")
+
+	if port == "" {
+		port = "8000"
+	}
+
+	r := mux.NewRouter()
+	r.HandleFunc("/", welcome)
+	book.SetupRouter(r.PathPrefix("/book").Subrouter())
+
+	readerConfiguration := pg.Option{
+		Host:     os.Getenv("PG_HOST"),
+		Port:     os.Getenv("PG_PORT"),
+		Database: os.Getenv("PG_DATABASE"),
+		User:     os.Getenv("PG_USER"),
+		Password: os.Getenv("PG_PASSWORD"),
+	}
+	writerConfiguration := pg.Option{
 		Host:     os.Getenv("PG_HOST"),
 		Port:     os.Getenv("PG_PORT"),
 		Database: os.Getenv("PG_DATABASE"),
@@ -24,30 +42,17 @@ func configurePG() {
 		Password: os.Getenv("PG_PASSWORD"),
 	}
 
-	err := pg.SetupDatabase(option)
+	err := pg.SetupDatabase(readerConfiguration, writerConfiguration)
 	if err != nil {
 		panic(err)
 	}
 
-	log.Println("PostgreSQL connection is successfully established!")
-}
-
-func startServer() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8000"
-	}
-
-	api := routers.NewAPI()
-
 	srv := &http.Server{
-		Handler:      api.Router,
-		Addr:         ":" + port,
+		Handler:      r,
+		Addr:         "127.0.0.1:" + port,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
-
-	log.Printf("Starting server on port %s!", port)
 
 	log.Fatal(srv.ListenAndServe())
 }

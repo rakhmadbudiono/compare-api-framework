@@ -15,20 +15,29 @@ type Option struct {
 	Password string
 }
 
-var option *sql.DB
+var reader *sql.DB
+var writer *sql.DB
 
-func Options() *sql.DB {
-	return option
+// Reader will return pg connection which has priviledges for reading data
+func Reader() *sql.DB {
+	return reader
+}
+
+// Writer will return pg connection which has priviledges for manipilating data
+func Writer() *sql.DB {
+	return writer
 }
 
 // SetupDatabase will prepare pg connection
-func SetupDatabase(optionConfig Option) error {
+func SetupDatabase(readerConfig Option, writerConfig Option) error {
 	var err error
 
-	option, err = createConnection(optionConfig)
+	reader, err = createConnection(readerConfig)
 	if err != nil {
 		return err
 	}
+
+	writer, err = createConnection(writerConfig)
 
 	return err
 }
