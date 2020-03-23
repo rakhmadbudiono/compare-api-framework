@@ -6,7 +6,7 @@ import (
 )
 
 func handleJSONResponse(w http.ResponseWriter, v interface{}) {
-	message, err := json.Marshal(v)
+	message, _ := json.Marshal(v)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)

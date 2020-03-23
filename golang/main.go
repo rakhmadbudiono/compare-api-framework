@@ -20,6 +20,8 @@ func configurePG() {
 		Host:     os.Getenv("PG_HOST"),
 		Port:     os.Getenv("PG_PORT"),
 		Database: os.Getenv("PG_DATABASE"),
+		User:     os.Getenv("PG_USER"),
+		Password: os.Getenv("PG_PASSWORD"),
 	}
 
 	err := pg.SetupDatabase(option)
@@ -36,8 +38,10 @@ func startServer() {
 		port = "8000"
 	}
 
+	api := routers.NewAPI()
+
 	srv := &http.Server{
-		Handler:      api.Router(),
+		Handler:      api.Router,
 		Addr:         ":" + port,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,

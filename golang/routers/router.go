@@ -1,7 +1,9 @@
 package routers
 
 import (
+	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 
@@ -10,13 +12,13 @@ import (
 )
 
 type API struct {
-	Service *service.BookService
+	Service *services.BookService
 	Router  *mux.Router
 }
 
 func NewAPI() *API {
 	api := API{
-		Service: service.NewBookService(),
+		Service: services.NewBookService(),
 		Router:  Router(),
 	}
 
@@ -93,10 +95,10 @@ func Router() *mux.Router {
 // wingman
 
 func (a *API) createBook(res http.ResponseWriter, req *http.Request) {
-	var b Book
+	var b models.Book
 	json.NewDecoder(req.Body).Decode(&b)
 
-	bookID := r.Service.CreateBook(&b)
+	bookID := a.Service.CreateBook(&b)
 
 	json.NewEncoder(res).Encode(struct {
 		ID int64 `json:"id"`
@@ -104,7 +106,7 @@ func (a *API) createBook(res http.ResponseWriter, req *http.Request) {
 }
 
 func (a *API) getBooks(res http.ResponseWriter, req *http.Request) {
-	books := r.Service.GetBooks()
+	books := a.Service.GetBooks()
 
 	json.NewEncoder(res).Encode(books)
 }
@@ -117,7 +119,7 @@ func (a *API) getBookByID(res http.ResponseWriter, req *http.Request) {
 		panic(err)
 	}
 
-	b := r.Service.GetBookByID(id)
+	b := a.Service.GetBookByID(id)
 
 	json.NewEncoder(res).Encode(b)
 }
@@ -130,11 +132,11 @@ func (a *API) updateBook(res http.ResponseWriter, req *http.Request) {
 		panic(err)
 	}
 
-	p := &Book{ID: id}
+	b := &models.Book{ID: id}
 
-	json.NewDecoder(req.Body).Decode(p)
+	json.NewDecoder(req.Body).Decode(b)
 
-	b.Service.UpdateBook(p)
+	a.Service.UpdateBook(b)
 
 	res.WriteHeader(204)
 	res.Write([]byte{})
@@ -148,7 +150,7 @@ func (a *API) deleteBook(res http.ResponseWriter, req *http.Request) {
 		panic(err)
 	}
 
-	b.Service.DeleteBook(id)
+	a.Service.DeleteBook(id)
 
 	res.WriteHeader(204)
 	res.Write([]byte{})

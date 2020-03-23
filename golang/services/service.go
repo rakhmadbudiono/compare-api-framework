@@ -1,30 +1,37 @@
 package services
 
 import (
+	"github.com/rakhmadbudiono/compare-api-framework/golang/models"
 	"github.com/rakhmadbudiono/compare-api-framework/golang/repositories"
 )
 
 type BookService struct {
-	repo *Repositories
+	repo *repositories.Repositories
 }
 
-func (s *BookService) CreateBook(p *Book) int64 {
-	s.repo.createBook(p)
+func NewBookService() *BookService {
+	service := &BookService{ repo: repositories.NewRepo() }
+
+	return service
+}
+
+func (s *BookService) CreateBook(p *models.Book) int64 {
+	s.repo.CreateBook(p)
 	return p.ID
 }
 
-func (s *BookService) GetBooks(q *Query) []Book {
-	return s.repo.getBooks(q)
+func (s *BookService) GetBooks() []models.Book {
+	return s.repo.GetBooks()
 }
 
-func (s *BookService) GetBookByID(ID int64) *Book {
-	return s.repo.getBookByID(ID)
+func (s *BookService) GetBookByID(ID int64) *models.Book {
+	return s.repo.GetBookByID(ID)
 }
 
-func (s *BookService) UpdateBook(p *Book) {
-	s.repo.updateBook(p)
+func (s *BookService) UpdateBook(p *models.Book) {
+	s.repo.UpdateBook(p)
 }
 
 func (s *BookService) DeleteBook(ID int64) {
-	s.repo.deleteBook(ID)
+	s.repo.DeleteBook(ID)
 }

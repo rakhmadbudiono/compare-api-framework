@@ -1,7 +1,7 @@
 package models
 
 type Book struct {
-	ID   	int			`json:"id_book"`
+	ID   	int64		`json:"id_book"`
 	Title 	string    	`json:"title"`
 }
 
@@ -13,10 +13,10 @@ func NewBook(title string) *Book {
 	return book
 }
 
-func (m *Book) GetID() int {
-	return m.ID
+func (b *Book) GetID() int64 {
+	return b.ID
 }
 
-func (m *Book) GetTitle() string {
-	return m.Title
+func (b *Book) GetTitle() string {
+	return b.Title
 }

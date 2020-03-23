@@ -9,29 +9,35 @@ import (
 
 type Repositories struct{}
 
-func (repos *Repositories) createBook(b *Book) {
+func NewRepo() *Repositories {
+	repo := &Repositories{}
+
+	return repo
+}
+
+func (repos *Repositories) CreateBook(b *models.Book) {
 	query := sq.Insert("book").
 		Columns("title").
 		Values(b.Title).
 		RunWith(pg.Options()).
 		PlaceholderFormat(sq.Dollar)
 
-	result, err := query.Exec()
+	_, err := query.Exec()
 	if err != nil {
 		panic(err)
 	}
 }
 
-func (repos *Repositories) getBooks() []Book {
+func (repos *Repositories) GetBooks() []models.Book {
 	sqlStatement := sq.Select("*").From("book")
 
 	rows, err := sqlStatement.RunWith(pg.Options()).Query()
 
-	books := []Book{}
+	books := []models.Book{}
 
 	for rows.Next() {
-		var b Book
-		err = rows.Scan(&b.ID, &b.Name)
+		var b models.Book
+		err = rows.Scan(&b.ID, &b.Title)
 		if err != nil {
 			panic(err)
 		}
@@ -42,14 +48,14 @@ func (repos *Repositories) getBooks() []Book {
 	return books
 }
 
-func (repos *Repositories) getBookByID(ID int64) *Book {
+func (repos *Repositories) GetBookByID(ID int64) *models.Book {
 	query := sq.Select("*").
 		From("book").
 		Where(sq.Eq{"id": ID}).
 		RunWith(pg.Options()).
 		PlaceholderFormat(sq.Dollar)
 
-	b := &Book{ID: ID}
+	b := &models.Book{ID: ID}
 
 	rows, err := query.Query()
 	if err != nil {
@@ -57,16 +63,16 @@ func (repos *Repositories) getBookByID(ID int64) *Book {
 	}
 
 	if rows.Next() {
-		rows.Scan(b.Name)
+		rows.Scan(b.Title)
 		return b
 	}
 
 	return nil
 }
 
-func (repos *Repositories) updateBook(b *Book) {
+func (repos *Repositories) UpdateBook(b *models.Book) {
 	query := sq.Update("book").
-		Set("name", b.Name).
+		Set("title", b.Title).
 		Where(sq.Eq{"id": b.ID}).
 		RunWith(pg.Options()).
 		PlaceholderFormat(sq.Dollar)
@@ -77,7 +83,7 @@ func (repos *Repositories) updateBook(b *Book) {
 	}
 }
 
-func (repos *Repositories) deleteBook(ID int64) {
+func (repos *Repositories) DeleteBook(ID int64) {
 	query := sq.Delete("book").
 		Where(sq.Eq{"id": ID}).
 		RunWith(pg.Options()).
